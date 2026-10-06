@@ -1,0 +1,43 @@
+name: Terraform Lint & Validation Gate
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "terraform/**"
+      - ".github/workflows/terraform-ci.yml"
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - "terraform/**"
+
+permissions:
+  contents: read
+
+jobs:
+  terraform-checks:
+    name: Terraform Format & Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform CLI
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.8.0"
+
+      - name: Check Canonical Formatting (terraform fmt)
+        run: |
+          terraform fmt -check -recursive terraform/
+
+      - name: Initialize Dev Environment (terraform init)
+        working-directory: ./terraform/environments/dev
+        run: |
+          terraform init -backend=false
+
+      - name: Validate Dev Syntax (terraform validate)
+        working-directory: ./terraform/environments/dev
+        run: |
+          terraform validate
