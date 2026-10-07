@@ -128,6 +128,7 @@ pytest -v app/tests/test_main.py
 
 # Launch development server
 uvicorn app.src.main:app --host 0.0.0.0 --port 8000 --reload
+```
 
 ### 2. Run Container with Docker
 ```bash
@@ -139,24 +140,22 @@ docker run -p 8000:8000 --rm cloud-gitops-engine:local
 
 # Test health check probe
 curl http://localhost:8000/health
+```
 
 ### 3. Validate Terraform Configurations
+```bash
 cd terraform/environments/dev
 terraform fmt -check -recursive ../../
 terraform init -backend=false
 terraform validate
-
-Route,Method,Access,Description
-/,GET,Public (via ALB),Welcome diagnostic payload
-/health,GET,Public (via ALB),"Target group health probe (status, environment, version)"
-/docs,GET,Public (via ALB),Native Swagger UI OpenAPI documentation
+```
 
 ---
 
-### Next Step
-Save the file (`Ctrl + S`), then push it to GitHub:
+## 📊 Live Endpoints
 
-```bash
-git add README.md
-git commit -m "docs: complete enterprise architectural README and system documentation"
-git push origin main
+| Route | Method | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `/` | `GET` | Public (via ALB) | Welcome diagnostic payload |
+| `/health` | `GET` | Public (via ALB) | Target group health probe (status, environment, version) |
+| `/docs` | `GET` | Public (via ALB) | Native Swagger UI OpenAPI documentation |
