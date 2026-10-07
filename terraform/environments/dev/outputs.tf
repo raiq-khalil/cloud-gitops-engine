@@ -1,19 +1,20 @@
 output "dev_vpc_id" {
-  description = "The ID of the development VPC"
-  value       = module.vpc.vpc_id
+  value = module.vpc.vpc_id
 }
 
-output "dev_public_subnet_id" {
-  description = "The subnet ID for public ingress / load balancer"
-  value       = module.vpc.public_subnet_id
+output "dev_alb_dns_name" {
+  description = "The public URL to reach the API once live"
+  value       = module.alb.alb_dns_name
+}
+
+output "dev_target_group_arn" {
+  value = module.alb.target_group_arn
+}
+
+output "dev_app_security_group_id" {
+  value = module.security.app_security_group_id
 }
 
 output "dev_private_subnet_id" {
-  description = "The subnet ID for isolated container workloads"
-  value       = module.vpc.private_subnet_id
-}
-
-output "dev_nat_gateway_ip" {
-  description = "Public Elastic IP assigned to the development NAT Gateway"
-  value       = module.vpc.nat_gateway_ip
+  value = module.vpc.private_subnet_id
 }

@@ -3,9 +3,9 @@ output "vpc_id" {
   value       = aws_vpc.main.id
 }
 
-output "public_subnet_id" {
-  description = "The ID of the public subnet"
-  value       = aws_subnet.public.id
+output "public_subnet_ids" {
+  description = "List of public subnet IDs for the ALB"
+  value       = aws_subnet.public[*].id
 }
 
 output "private_subnet_id" {
@@ -14,6 +14,6 @@ output "private_subnet_id" {
 }
 
 output "nat_gateway_ip" {
-  description = "Static Elastic IP allocated to the NAT Gateway"
+  description = "Elastic IP allocated to the NAT Gateway"
   value       = aws_eip.nat.public_ip
 }

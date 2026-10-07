@@ -13,14 +13,36 @@ provider "aws" {
   region = var.aws_region
 }
 
-# Invoke the VPC module using relative path addressing
+# 1. Multi-AZ VPC Module
 module "vpc" {
   source = "../../modules/vpc"
 
   vpc_cidr            = var.vpc_cidr
-  public_subnet_cidr  = var.public_subnet_cidr
+  public_subnet_cidrs = var.public_subnet_cidrs
   private_subnet_cidr = var.private_subnet_cidr
-  availability_zone   = var.availability_zone
+  availability_zones  = var.availability_zones
   environment         = var.environment
   project_name        = var.project_name
+}
+
+# 2. Security Groups Module
+module "security" {
+  source = "../../modules/security"
+
+  vpc_id         = module.vpc.vpc_id
+  environment    = var.environment
+  project_name   = var.project_name
+  container_port = var.container_port
+}
+
+# 3. Application Load Balancer Module
+module "alb" {
+  source = "../../modules/alb"
+
+  project_name          = var.project_name
+  environment           = var.environment
+  vpc_id                = module.vpc.vpc_id
+  public_subnet_ids     = module.vpc.public_subnet_ids
+  alb_security_group_id = module.security.alb_security_group_id
+  container_port        = var.container_port
 }

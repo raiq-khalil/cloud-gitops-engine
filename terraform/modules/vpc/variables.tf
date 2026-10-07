@@ -4,32 +4,32 @@ variable "vpc_cidr" {
   default     = "10.0.0.0/16"
 }
 
-variable "public_subnet_cidr" {
-  description = "CIDR block for the public subnet (DMZ / Load Balancers)"
-  type        = string
-  default     = "10.0.1.0/24"
+variable "public_subnet_cidrs" {
+  description = "CIDR blocks for public subnets (minimum 2 for ALB)"
+  type        = list(string)
+  default     = ["10.0.1.0/24", "10.0.2.0/24"]
 }
 
 variable "private_subnet_cidr" {
-  description = "CIDR block for the private subnet (Application & Database tier)"
+  description = "CIDR block for the private subnet"
   type        = string
-  default     = "10.0.2.0/24"
+  default     = "10.0.10.0/24"
 }
 
-variable "availability_zone" {
-  description = "Target availability zone for subnet deployment"
-  type        = string
-  default     = "us-east-1a"
+variable "availability_zones" {
+  description = "Target availability zones"
+  type        = list(string)
+  default     = ["us-east-1a", "us-east-1b"]
 }
 
 variable "environment" {
-  description = "Deployment environment name (e.g., dev, staging, prod)"
+  description = "Deployment environment name"
   type        = string
   default     = "dev"
 }
 
 variable "project_name" {
-  description = "Base name tag for identifying resources"
+  description = "Base name tag"
   type        = string
   default     = "cloud-gitops"
 }
