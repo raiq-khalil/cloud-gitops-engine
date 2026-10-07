@@ -46,3 +46,17 @@ module "alb" {
   alb_security_group_id = module.security.alb_security_group_id
   container_port        = var.container_port
 }
+
+# 4. Compute / ECS Fargate Module
+module "compute" {
+  source = "../../modules/compute"
+
+  project_name          = var.project_name
+  environment           = var.environment
+  vpc_id                = module.vpc.vpc_id
+  private_subnet_id     = module.vpc.private_subnet_id
+  app_security_group_id = module.security.app_security_group_id
+  target_group_arn      = module.alb.target_group_arn
+  container_image       = var.container_image
+  container_port        = var.container_port
+}
