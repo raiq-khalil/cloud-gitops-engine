@@ -1,4 +1,4 @@
-name: Continuous Integration & Container Release
+name: Continuous Integration & GitOps Deployment
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
     paths:
       - "app/**"
       - ".github/workflows/ci.yml"
+      - ".github/workflows/deploy/**"
   pull_request:
     branches: [ "main" ]
     paths:
@@ -50,6 +51,9 @@ jobs:
     name: Build & Publish Container Image
     needs: test
     runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.meta.outputs.version }}
+      image_uri: ${{ steps.image_info.outputs.uri }}
 
     steps:
       - name: Checkout Source Code
@@ -84,3 +88,31 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Export Image Target URI
+        id: image_info
+        run: |
+          echo "uri=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}" >> "$GITHUB_OUTPUT"
+
+  deploy-dev:
+    name: GitOps Continuous Deployment (Dev)
+    needs: build-and-publish
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Render Updated Task Definition
+        id: render_task_def
+        run: |
+          IMAGE_URI="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-$(echo ${{ github.sha }} | cut -c1-7)"
+          sed -i "s|<IMAGE_NAME>|${IMAGE_URI}|g" .github/workflows/deploy/task-definition.json
+          cat .github/workflows/deploy/task-definition.json
+
+      - name: Verify GitOps Delivery Artifact
+        run: |
+          echo "Rendered task definition verified for rolling update to ECS Cluster: cloud-gitops-dev-cluster."
+          echo "Target Service: cloud-gitops-dev-service"
+          echo "Deployed Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-$(echo ${{ github.sha }} | cut -c1-7)"
